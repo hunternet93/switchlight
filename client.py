@@ -1,12 +1,12 @@
-import sockethandler, time, sys
+import sockethandler, time, sys, tkFont
 from Tkinter import *
 
 class Switch:
     def __init__(self, name, num, window, conn):
         self.name = name
         self.num = num
-        self.button = Button(window, text = self.name, command = self.pressed, fg = "red")
-        self.button.pack(side=LEFT, fill=BOTH)
+        self.button = Button(window, text = self.name, command = self.pressed, fg = "red", font = tkFont.Font(size=20, weight=tkFont.BOLD))
+        self.button.pack(side=LEFT, fill=BOTH, expand=1)
         self.active = False
         self.conn = conn
 
