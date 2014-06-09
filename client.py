@@ -5,7 +5,8 @@ class Switch:
     def __init__(self, name, num, window, conn):
         self.name = name
         self.num = num
-        self.button = Button(window, text = self.name, command = self.pressed, fg = "red", font = tkFont.Font(size=20, weight=tkFont.BOLD))
+        self.button = Button(window, text = self.name, command = self.pressed, font = tkFont.Font(size=20, weight=tkFont.BOLD))
+        self.button.config(fg = "red", activebackground = "white", bg = "white", activeforeground="red")
         self.button.pack(side=LEFT, fill=BOTH, expand=1)
         self.active = False
         self.conn = conn
@@ -18,11 +19,11 @@ class Switch:
             self.conn.send(['on', self.num])
 
     def on(self):
-        self.button.config(fg="green")
+        self.button.config(fg="green", activeforeground="green")
         self.active = True
 
     def off(self):
-        self.button.config(fg="red")
+        self.button.config(fg="red", activeforeground="red")
         self.active = False
     
 
