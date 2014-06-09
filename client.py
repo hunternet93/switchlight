@@ -62,7 +62,6 @@ try:
     root.mainloop()
 except:
     conn.send(['bye'])
-    conn.flush()
     conn.close()
     raise
 
