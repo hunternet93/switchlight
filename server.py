@@ -22,8 +22,8 @@ class Switch:
         self.time = None
 
     def on(self):
+        #if self.active: return
         print('switch ' + self.name + ' turned on')
-        if self.active: pass
         self.active = True
         if self.fade == 0:
             self.val = self.onval
@@ -34,8 +34,8 @@ class Switch:
         self.time = time.time()
 
     def off(self):
+        if not self.active: return
         print('switch ' + self.name + ' turned off')
-        if not self.active: pass
         self.active = False
         if self.fade == 0:
             self.val = self.offval
@@ -72,7 +72,7 @@ class Main:
         for switch in self.settings['switches'].items():
             self.switches.append(Switch(switch[0], switch[1]))
 
-        self.current_dmx = array.array('B', [0] * 255)
+        self.current_dmx = array.array('B', [0] * 512)
 
         self.wrapper = ClientWrapper()
         self.wrapper.AddEvent(100, self.loop)
@@ -94,7 +94,7 @@ class Main:
                 print('client ' + str(addr) + ' disconnected')
                 self.clients.remove(addr)
 
-        dmx = array.array('B', [0] * 255)
+        dmx = array.array('B', [0] * 512)
         msg = ['sw']
 
         for switch in self.switches:
@@ -118,5 +118,7 @@ try:
     main = Main()
     main.wrapper.Run()
 except:
+    for client in main.clients:
+        main.serv.send(['bye'], client)
     main.serv.close()
     raise

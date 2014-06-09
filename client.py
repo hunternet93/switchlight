@@ -5,24 +5,24 @@ class Switch:
     def __init__(self, name, num, window, conn):
         self.name = name
         self.num = num
-        self.button = Button(window, text = self.name, command = self.pressed)
+        self.button = Button(window, text = self.name, command = self.pressed, fg = "red")
         self.button.pack(side=LEFT, fill=BOTH)
         self.active = False
         self.conn = conn
 
     def pressed(self):
-        print('button ' + self.name + ' pressed')
+        print('button ' + self.name + ' pressed, is ' + str(self.active))
         if self.active:
-            self.conn.send(['on', self.num])
-        else:
             self.conn.send(['off', self.num])
+        else:
+            self.conn.send(['on', self.num])
 
     def on(self):
-        self.button.config(state = ACTIVE)
+        self.button.config(fg="green")
         self.active = True
 
     def off(self):
-        self.button.config(state = NORMAL)
+        self.button.config(fg="red")
         self.active = False
     
 
@@ -40,14 +40,16 @@ def main():
                 for switch in msg[1:]:
                     switches.append(Switch(switch, len(switches), root, conn))
             if msg[0] == 'sw':
-                for status in msg[1:]:
-                    if status and switches[msg.index(status)-1].active:
-                        print('switch ' + switches[msg.index(status)-1].name + ' turned off.')
-                        switches[msg.index(status)-1].off()
-                    elif not status and not switches[msg.index(status)-1].active:
-                        print('switch ' + switches[msg.index(status)-1].name + ' turned on.')
-                        switches[msg.index(status)-1].on()
-
+                for i in range(1, len(msg)):
+                    s = switches[i-1]
+                    if msg[i] and not s.active:
+                        print('switch ' + s.name + ' turned on.')
+                        s.on()
+                    elif not msg[i] and s.active:
+                        print('switch ' + s.name + ' turned off.')
+                        s.off()
+            if msg[0] == 'bye':
+                root.destroy()
         root.after(100, main)
     except:
         conn.close()
@@ -60,6 +62,7 @@ try:
     root.mainloop()
 except:
     conn.send(['bye'])
+    conn.flush()
     conn.close()
     raise
 

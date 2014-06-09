@@ -1,4 +1,4 @@
-address: localhost
+address: 0.0.0.0
 passcode: 12345
 universe: 1
 
@@ -14,3 +14,8 @@ switches:
         offval: 0
         fade: 0
         start: on
+    lobby:
+        addrs: [127, 511]
+        onval: 255
+        offval: 0
+        fade: 0
