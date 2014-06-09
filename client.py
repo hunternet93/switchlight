@@ -60,6 +60,7 @@ def main():
 switches = []
 try:
     root = Tk()
+    root.wm_title('Switchlight')
     root.after(1, main)
     root.mainloop()
 except:
