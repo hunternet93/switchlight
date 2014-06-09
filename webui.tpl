@@ -6,7 +6,7 @@
             a {color: #000000;}
         </style>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <head>
+    </head>
     <body>
         <h1>Switchlight</h1>
         <br>
@@ -15,6 +15,7 @@
                 % c = '#00FF00'
             % elif sw[2] == 'off':
                 % c = '#FF0000'
+            % end
             <p style="color: {{c}}"><a href="/set/{{sw[1]}}">{{sw[0]}}</a><br> {{sw[2]}}</p>
         % end
     </body>
