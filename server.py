@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sockethandler, yaml, array, sys, time
 from ola.ClientWrapper import ClientWrapper
 

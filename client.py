@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sockethandler, time, sys, tkFont
 from Tkinter import *
 
