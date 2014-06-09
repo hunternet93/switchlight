@@ -100,7 +100,7 @@ class Main:
 
         for switch in self.switches:
             addrs, val = switch.tick()
-            for addr in addrs: dmx[addr] = val
+            for addr in addrs: dmx[addr-1] = val
             msg.append(switch.active)
 
         for client in self.clients:
