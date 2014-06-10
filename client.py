@@ -31,8 +31,14 @@ class Switch:
 try: addr = sys.argv[1].split(':')
 except: print('Usage: client.py server_address[:port]'); quit()
 if len(addr) < 2: addr.append(25500)
-conn = sockethandler.client(addr[0], addr[1])
-conn.send(['hi'])
+
+while True:
+    try:
+        conn = sockethandler.client(addr[0], addr[1])
+        conn.send(['hi'])
+        break
+    except socket.error:
+        time.sleep(2.5)
 
 def main():
     try:
