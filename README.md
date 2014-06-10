@@ -1,11 +1,11 @@
 switchlight
 ===========
 
-Switchlight is a simple OpenLighting network light switch designed to turn lights on and off while the primary DMX controller is offline. It supports multiple clients using a native client or a web UI.
+Switchlight is a simple OpenLightingArchitecture network light switch designed to turn lights on and off while the primary DMX controller is offline. It supports multiple clients using a native client or a web UI.
 
 Requirements
 ------------
-Server:     Python, OLA, Python-YAML
+Server:     Python, [OLA](www.openlighting.org), Python-YAML
 Client:     Python, Python-Tkinter
 Web Client: Python, Python-Bottle
 
