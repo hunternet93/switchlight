@@ -6,6 +6,7 @@
             a {color: #000000;}
         </style>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta http-equiv="refresh" content="5">
     </head>
     <body>
         <h1>Switchlight</h1>

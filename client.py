@@ -68,4 +68,5 @@ except:
     conn.close()
     raise
 
+conn.send(['bye'])
 conn.close()
