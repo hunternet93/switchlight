@@ -5,7 +5,7 @@ Switchlight is a simple OpenLightingArchitecture network light switch designed t
 
 Requirements
 ------------
-Server:     Python, [OLA](www.openlighting.org), Python-YAML
+Server:     Python, [OLA](http://www.openlighting.org), Python-YAML
 Client:     Python, Python-Tkinter
 Web Client: Python, Python-Bottle
 
