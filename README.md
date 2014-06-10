@@ -23,6 +23,7 @@ To start the client:
 Future Features
 ---------------
 Passcode-protected locking capability
+
 More robust networking code
 
 Credits
