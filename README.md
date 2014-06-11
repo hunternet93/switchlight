@@ -29,8 +29,6 @@ To start the client:
 
 Future Features
 ---------------
-Passcode-protected locking capability
-
 Lights-off timer
 
 Credits
