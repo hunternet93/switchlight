@@ -75,6 +75,9 @@ class Main:
         self.serv = sockethandler.server(self.settings.get('address') or 'localhost', self.settings.get('port') or 25500)
         self.clients = {}
 
+        self.locked = False
+        self.passcode = self.settings['passcode']
+
         self.switches = {}
         for switch in self.settings['switches'].items():
             self.switches[switch[0]] = Switch(switch[0], switch[1])
@@ -87,11 +90,13 @@ class Main:
     def send_status(self, clients):
         status = {}
         status['sw'] = [[s.name, s.active] for s in self.switches.values()]
+        status['l'] = [self.passcode, self.locked]
         for client in clients:
             self.serv.send(['s', status], client.addr)
 
     def loop(self):
         self.wrapper.AddEvent(100, self.loop)
+        send_update = False
         for msg, addr in self.serv.recv():
             if self.settings.get('debug'): print(msg, addr)
             if not self.clients.get(addr):
@@ -106,8 +111,16 @@ class Main:
                 client.lasthb = time.time()
             elif msg[0] == 'on':
                 self.switches[msg[1]].on()
+                send_update = True
             elif msg[0] == 'off':
                 self.switches[msg[1]].off()
+                send_update = True
+            elif msg[0] == 'lock':
+                self.locked = True
+                send_update = True
+            elif msg[0] == 'unlock':
+                self.locked = False
+                send_update = True
             elif msg[0] == 'bye':
                 print('client ' + str(addr) + ' disconnected')
                 self.clients.remove(addr)
@@ -128,9 +141,12 @@ class Main:
                 del self.clients[client.addr]
 
         if not dmx == self.current_dmx:
-            self.send_status(self.clients.values())
+            send_update = True
             self.wrapper.Client().SendDmx(self.settings['universe'], dmx, self.DmxSent)
             self.current_dmx = dmx
+
+        if send_update:
+            self.send_status(self.clients.values())
 
     def DmxSent(self, state):
         if not state.Succeeded():

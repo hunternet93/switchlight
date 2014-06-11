@@ -25,36 +25,44 @@ class Switch:
     def off(self):
         self.button.config(fg="red", activeforeground="red")
         self.active = False
-    
 
-try: addr = sys.argv[1].split(':')
-except: print('Usage: client.py server_address[:port]'); quit()
-if len(addr) < 2: addr.append(25500)
 
-while True:
-    try:
-        conn = sockethandler.client(addr[0], addr[1])
-        conn.send(['hi'])
-        break
-    except socket.error:
-        time.sleep(2.5)
+class Main:
+    def __init__(self):
+        try: addr = sys.argv[1].split(':')
+        except: print('Usage: client.py server_address[:port]'); quit()
+        if len(addr) < 2: addr.append(25500)
 
-def main():
-    try:
-        for msg in conn.recv():
+        self.conn = sockethandler.client(addr[0], addr[1])
+        self.conn.send(['hi'])
+
+        self.root = Tk()
+        self.root.wm_title('Switchlight')
+        self.root.after(1, self.loop)
+
+        self.switches = {}
+        self.locked = False
+
+    def run(self):
+        self.root.mainloop()
+        self.conn.send(['bye'])
+        self.conn.close()
+
+    def loop(self):
+        for msg in self.conn.recv():
             if msg[0] == 'hb':
-                conn.send(['hb'])
+                self.conn.send(['hb'])
 
             if msg[0] == 's':
-                if not [s[0] for s in msg[1]['sw']] == [s.name for s in switches.values()]:
-                    for sw in switches.values(): 
+                if not [s[0] for s in msg[1]['sw']] == [s.name for s in self.switches.values()]:
+                    for sw in self.switches.values(): 
                         sw.button.pack_forget()
-                        del switches[sw.name]
+                        del self.switches[sw.name]
                     for m in msg[1]['sw']:
-                        switches[m[0]] = Switch(m[0], root, conn)
+                        self.switches[m[0]] = Switch(m[0], self.root, self.conn)
 
                 for m in msg[1]['sw']:
-                    s = switches[m[0]]
+                    s = self.switches[m[0]]
                     if m[1] and not s.active:
                         print('switch ' + s.name + ' turned on.')
                         s.on()
@@ -63,24 +71,15 @@ def main():
                         s.off()
 
             if msg[0] == 'bye':
-                root.destroy()
+                self.root.destroy()
 
-        root.after(100, main)
+        self.root.after(100, main)
 
-    except:
-        conn.close()
-        raise
 
-switches = {}
 try:
-    root = Tk()
-    root.wm_title('Switchlight')
-    root.after(1, main)
-    root.mainloop()
+    main = Main()
+    main.run()
 except:
     conn.send(['bye'])
     conn.close()
     raise
-
-conn.send(['bye'])
-conn.close()
