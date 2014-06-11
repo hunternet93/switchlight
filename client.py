@@ -29,22 +29,76 @@ class Switch:
 
 class Main:
     def __init__(self):
-        try: addr = sys.argv[1].split(':')
+        try: self.addr = sys.argv[1].split(':')
         except: print('Usage: client.py server_address[:port]'); quit()
-        if len(addr) < 2: addr.append(25500)
-
-        self.conn = sockethandler.client(addr[0], addr[1])
-        self.conn.send(['hi'])
+        if len(self.addr) < 2: self.addr.append(25500)
 
         self.root = Tk()
         self.root.wm_title('Switchlight')
         self.root.after(1, self.loop)
 
+        self.menubutton = Button(self.root, text="Menu", command = self.show_menu)
+        self.menubutton.pack(anchor='w')
+
+        self.switchframe = Frame(self.root)
+        self.switchframe.pack(fill=BOTH, expand=1)
+
         self.switches = {}
         self.locked = False
+        self.passcode = None
+
+    def show_menu(self):
+        self.menuwindow = Toplevel(self.root)
+        self.lockbutton = Button(self.menuwindow, text="Lock", command = self.send_lock)
+        self.lockbutton.pack(fill=BOTH, expand=1)
+        self.closebutton = Button(self.menuwindow, text="Close", command = self.menuwindow.destroy)
+        self.closebutton.pack()
+
+    def send_lock(self):
+        self.conn.send(['lock'])
+        self.menuwindow.destroy()
+
+    def send_unlock(self):
+        print('passcode entered: ' + self.lockbox.get('1.0', END).strip() + ' correct passcode: ' + str(self.passcode))
+        if self.lockbox.get('1.0', END).strip() == str(self.passcode):
+            self.conn.send(['unlock'])
+            self.locked = False
+            self.unlock()
+        else:
+            self.lockbox.delete('1.0', END)
+            self.locklabel.config(text="Incorrect passcode", fg='red')
+
+    def lock(self):
+        self.locked = True
+        self.menubutton.pack_forget()
+        self.switchframe.pack_forget()
+
+        self.lockframe = Frame(self.root)
+        self.lockframe.pack(fill=BOTH, expand=1)
+        self.locklabel = Label(self.lockframe, text="Enter passcode to unlock")
+        self.locklabel.grid(columnspan=3)
+        self.lockbox = Text(self.lockframe)
+        self.lockbox.grid(row=1, columnspan=3)
+
+        for n in range(1, 10):
+            Button(self.lockframe, text=str(n), command=lambda n=n: self.lockbox.insert(END, str(n))).grid(
+                  row=((n-1)/3)+2, column=n-(3*((n-1)/3)+1), sticky=N+S+E+W)
+
+        Button(self.lockframe, text='Clear', command=lambda: self.lockbox.delete('1.0', END), fg='red').grid(row=5, sticky=N+S+E+W)
+        Button(self.lockframe, text='0', command=lambda: self.lockbox.insert(END, '0')).grid(row=5, column=1, sticky=N+S+E+W)
+        Button(self.lockframe, text='Enter', command=self.send_unlock, fg='green').grid(row=5,column=2, sticky=N+S+E+W)
+
+    def unlock(self):
+        self.lockframe.pack_forget()
+        self.menubutton.pack(anchor='w')
+        self.switchframe.pack(fill=BOTH, expand=1)
 
     def run(self):
+        self.conn = sockethandler.client(self.addr[0], self.addr[1])
+        self.conn.send(['hi'])
+
         self.root.mainloop()
+
         self.conn.send(['bye'])
         self.conn.close()
 
@@ -59,7 +113,7 @@ class Main:
                         sw.button.pack_forget()
                         del self.switches[sw.name]
                     for m in msg[1]['sw']:
-                        self.switches[m[0]] = Switch(m[0], self.root, self.conn)
+                        self.switches[m[0]] = Switch(m[0], self.switchframe, self.conn)
 
                 for m in msg[1]['sw']:
                     s = self.switches[m[0]]
@@ -70,16 +124,21 @@ class Main:
                         print('switch ' + s.name + ' turned off.')
                         s.off()
 
+                if not self.passcode: self.passcode = msg[1]['l'][0]
+                if msg[1]['l'][1] == True and not self.locked: self.lock()
+                if msg[1]['l'][1] == False and self.locked: self.unlock()
+
             if msg[0] == 'bye':
                 self.root.destroy()
 
-        self.root.after(100, main)
+        self.root.after(100, main.loop)
 
 
+
+main = Main()
 try:
-    main = Main()
     main.run()
 except:
-    conn.send(['bye'])
-    conn.close()
+    main.conn.send(['bye'])
+    main.conn.close()
     raise

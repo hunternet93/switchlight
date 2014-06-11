@@ -116,9 +116,11 @@ class Main:
                 self.switches[msg[1]].off()
                 send_update = True
             elif msg[0] == 'lock':
+                print('locked by client: ', client.addr)
                 self.locked = True
                 send_update = True
             elif msg[0] == 'unlock':
+                print('unlocked by client: ', client.addr)
                 self.locked = False
                 send_update = True
             elif msg[0] == 'bye':
