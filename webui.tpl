@@ -12,12 +12,12 @@
         <h1>Switchlight</h1>
         <br>
         % for sw in switches:
-            % if sw[2] == 'on':
+            % if sw[1] == 'on':
                 % c = '#00FF00'
-            % elif sw[2] == 'off':
+            % elif sw[1] == 'off':
                 % c = '#FF0000'
             % end
-            <p style="color: {{c}}"><a href="/set/{{sw[1]}}">{{sw[0]}}</a><br> {{sw[2]}}</p>
+            <p style="color: {{c}}"><a href="/set/{{sw[0]}}">{{sw[0]}}</a><br> {{sw[1]}}</p>
         % end
     </body>
 </html>

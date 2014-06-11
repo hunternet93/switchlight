@@ -3,9 +3,8 @@ import sockethandler, time, sys, tkFont
 from Tkinter import *
 
 class Switch:
-    def __init__(self, name, num, window, conn):
+    def __init__(self, name, window, conn):
         self.name = name
-        self.num = num
         self.button = Button(window, text = self.name, command = self.pressed, font = tkFont.Font(size=20, weight=tkFont.BOLD))
         self.button.config(fg = "red", activebackground = "white", bg = "white", activeforeground="red")
         self.button.pack(side=LEFT, fill=BOTH, expand=1)
@@ -15,9 +14,9 @@ class Switch:
     def pressed(self):
         print('button ' + self.name + ' pressed, is ' + str(self.active))
         if self.active:
-            self.conn.send(['off', self.num])
+            self.conn.send(['off', self.name])
         else:
-            self.conn.send(['on', self.num])
+            self.conn.send(['on', self.name])
 
     def on(self):
         self.button.config(fg="green", activeforeground="green")
@@ -43,27 +42,36 @@ while True:
 def main():
     try:
         for msg in conn.recv():
-            if msg[0] == 'hi':
-                print('connected to server')
-                for switch in msg[1:]:
-                    switches.append(Switch(switch, len(switches), root, conn))
-            if msg[0] == 'sw':
-                for i in range(1, len(msg)):
-                    s = switches[i-1]
-                    if msg[i] and not s.active:
+            if msg[0] == 'hb':
+                conn.send(['hb'])
+
+            if msg[0] == 's':
+                if not [s[0] for s in msg[1]['sw']] == [s.name for s in switches.values()]:
+                    for sw in switches.values(): 
+                        sw.button.pack_forget()
+                        del switches[sw.name]
+                    for m in msg[1]['sw']:
+                        switches[m[0]] = Switch(m[0], root, conn)
+
+                for m in msg[1]['sw']:
+                    s = switches[m[0]]
+                    if m[1] and not s.active:
                         print('switch ' + s.name + ' turned on.')
                         s.on()
-                    elif not msg[i] and s.active:
+                    elif not m[1] and s.active:
                         print('switch ' + s.name + ' turned off.')
                         s.off()
+
             if msg[0] == 'bye':
                 root.destroy()
+
         root.after(100, main)
+
     except:
         conn.close()
         raise
 
-switches = []
+switches = {}
 try:
     root = Tk()
     root.wm_title('Switchlight')

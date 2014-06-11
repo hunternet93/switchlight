@@ -63,30 +63,47 @@ class Switch:
         return self.addrs, self.val
 
 
+class Client:
+    def __init__(self, addr):
+        self.addr = addr
+        self.lasthb = time.time()
+
+
 class Main:
     def __init__(self):
         self.settings = yaml.load(open('settings.yaml', 'r'))
         self.serv = sockethandler.server(self.settings.get('address') or 'localhost', self.settings.get('port') or 25500)
-        self.clients = []
+        self.clients = {}
 
-        self.switches = []
+        self.switches = {}
         for switch in self.settings['switches'].items():
-            self.switches.append(Switch(switch[0], switch[1]))
+            self.switches[switch[0]] = Switch(switch[0], switch[1])
 
         self.current_dmx = array.array('B', [0] * 512)
 
         self.wrapper = ClientWrapper()
         self.wrapper.AddEvent(100, self.loop)
 
+    def send_status(self, clients):
+        status = {}
+        status['sw'] = [[s.name, s.active] for s in self.switches.values()]
+        for client in clients:
+            self.serv.send(['s', status], client.addr)
+
     def loop(self):
         self.wrapper.AddEvent(100, self.loop)
         for msg, addr in self.serv.recv():
-            print(msg, addr)
-            if not addr in self.clients:
-                self.clients.append(addr)
+            if self.settings.get('debug'): print(msg, addr)
+            if not self.clients.get(addr):
+                self.clients[addr] = Client(addr)
                 print('client ' + str(addr) + ' connected')
+
+            client = self.clients[addr]
+
             if msg[0] == 'hi':
-                self.serv.send(['hi'] + [s.name for s in self.switches], addr)
+                self.send_status([client])
+            if msg[0] == 'hb':
+                client.lasthb = time.time()
             elif msg[0] == 'on':
                 self.switches[msg[1]].on()
             elif msg[0] == 'off':
@@ -98,18 +115,22 @@ class Main:
         dmx = array.array('B', [0] * 512)
         msg = ['sw']
 
-        for switch in self.switches:
+        for switch in self.switches.values():
             addrs, val = switch.tick()
             for addr in addrs: dmx[addr-1] = val
-            msg.append(switch.active)
 
-        for client in self.clients:
-            self.serv.send(msg, client)
-        
+        for client in self.clients.values():
+            if time.time() - client.lasthb > 0.5:
+                self.serv.send(['hb'], client.addr)
+
+            if time.time() - client.lasthb > 2:
+                print('client ' + str(client.addr) + ' timed out')
+                del self.clients[client.addr]
+
         if not dmx == self.current_dmx:
+            self.send_status(self.clients.values())
             self.wrapper.Client().SendDmx(self.settings['universe'], dmx, self.DmxSent)
             self.current_dmx = dmx
-
 
     def DmxSent(self, state):
         if not state.Succeeded():
@@ -119,7 +140,7 @@ try:
     main = Main()
     main.wrapper.Run()
 except:
-    for client in main.clients:
-        main.serv.send(['bye'], client)
+    for client in main.clients.values():
+        main.serv.send(['bye'], client.addr)
     main.serv.close()
     raise
