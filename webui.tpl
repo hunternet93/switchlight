@@ -18,7 +18,7 @@
             <p>Enter the passcode to unlock</p>
             <form name="passcode" action="unlock" method="post">
                 <input type="password" name="code">
-                <input type="submit" value="Enter">
+                <input type="submit" value="Unlock">
             </form>
         % else:
             % for sw in switches:
@@ -30,7 +30,7 @@
                 <p style="color: {{c}}"><a href="/set/{{sw[0]}}">{{sw[0]}}</a><br> {{sw[1]}}</p>
             % end
             <br><br><br>
-            </p><a href='/lock'>Lock</a></p>
+            <p><a href='/lock'>Lock</a></p>
         % end
     </body>
 </html>
