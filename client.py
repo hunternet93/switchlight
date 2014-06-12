@@ -37,7 +37,7 @@ class Main:
         self.root.wm_title('Switchlight')
         self.root.after(1, self.loop)
 
-        self.menubutton = Button(self.root, text="Menu", command = self.show_menu)
+        self.menubutton = Button(self.root, text="Menu", command = self.show_menu, font = tkFont.Font(size=16))
         self.menubutton.pack(anchor='w')
 
         self.switchframe = Frame(self.root)
@@ -49,9 +49,9 @@ class Main:
 
     def show_menu(self):
         self.menuwindow = Toplevel(self.root)
-        self.lockbutton = Button(self.menuwindow, text="Lock", command = self.send_lock)
+        self.lockbutton = Button(self.menuwindow, text="Lock", command = self.send_lock, font = tkFont.Font(size=20, weight=tkFont.BOLD))
         self.lockbutton.pack(fill=BOTH, expand=1)
-        self.closebutton = Button(self.menuwindow, text="Close", command = self.menuwindow.destroy)
+        self.closebutton = Button(self.menuwindow, text="Close", command = self.menuwindow.destroy, font = tkFont.Font(size=20, weight=tkFont.BOLD))
         self.closebutton.pack()
 
     def send_lock(self):
@@ -77,16 +77,16 @@ class Main:
         self.lockframe.pack(fill=BOTH, expand=1)
         self.locklabel = Label(self.lockframe, text="Enter passcode to unlock")
         self.locklabel.grid(columnspan=3)
-        self.lockbox = Text(self.lockframe)
+        self.lockbox = Text(self.lockframe, height=1, font = tkFont.Font(size=20, weight=tkFont.BOLD))
         self.lockbox.grid(row=1, columnspan=3)
 
         for n in range(1, 10):
-            Button(self.lockframe, text=str(n), command=lambda n=n: self.lockbox.insert(END, str(n))).grid(
+            Button(self.lockframe, text=str(n), command=lambda n=n: self.lockbox.insert(END, str(n)), font = tkFont.Font(size=16, weight=tkFont.BOLD)).grid(
                   row=((n-1)/3)+2, column=n-(3*((n-1)/3)+1), sticky=N+S+E+W)
 
-        Button(self.lockframe, text='Clear', command=lambda: self.lockbox.delete('1.0', END), fg='red').grid(row=5, sticky=N+S+E+W)
-        Button(self.lockframe, text='0', command=lambda: self.lockbox.insert(END, '0')).grid(row=5, column=1, sticky=N+S+E+W)
-        Button(self.lockframe, text='Enter', command=self.send_unlock, fg='green').grid(row=5,column=2, sticky=N+S+E+W)
+        Button(self.lockframe, text='Clear', command=lambda: self.lockbox.delete('1.0', END), fg='red', font = tkFont.Font(size=12, weight=tkFont.BOLD)).grid(row=5, sticky=N+S+E+W)
+        Button(self.lockframe, text='0', command=lambda: self.lockbox.insert(END, '0'), font = tkFont.Font(size=16, weight=tkFont.BOLD)).grid(row=5, column=1, sticky=N+S+E+W)
+        Button(self.lockframe, text='Enter', command=self.send_unlock, fg='green', font = tkFont.Font(size=12, weight=tkFont.BOLD)).grid(row=5,column=2, sticky=N+S+E+W)
 
     def unlock(self):
         self.lockframe.pack_forget()
