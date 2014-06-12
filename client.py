@@ -73,20 +73,24 @@ class Main:
         self.menubutton.pack_forget()
         self.switchframe.pack_forget()
 
-        self.lockframe = Frame(self.root)
+        self.lockframe = Frame(self.root, borderwidth=2, relief=RAISED)
         self.lockframe.pack(fill=BOTH, expand=1)
         self.locklabel = Label(self.lockframe, text="Enter passcode to unlock")
         self.locklabel.grid(columnspan=3, sticky=N+S+E+W)
-        self.lockbox = Entry(self.lockframe, show="*", font = tkFont.Font(size=20, weight=tkFont.BOLD))
+        self.lockbox = Entry(self.lockframe, show="*", font = tkFont.Font(size=24, weight=tkFont.BOLD))
         self.lockbox.grid(row=1, columnspan=3, sticky=N+S+E+W)
 
         for n in range(1, 10):
-            Button(self.lockframe, text=str(n), command=lambda n=n: self.lockbox.insert(END, str(n)), font = tkFont.Font(size=16, weight=tkFont.BOLD)).grid(
+            Button(self.lockframe, text=str(n), command=lambda n=n: self.lockbox.insert(END, str(n)), font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(
                   row=((n-1)/3)+2, column=n-(3*((n-1)/3)+1), sticky=N+S+E+W)
 
-        Button(self.lockframe, text='Clear', command=lambda: self.lockbox.delete('0', END), fg='red', font = tkFont.Font(size=12, weight=tkFont.BOLD)).grid(row=5, sticky=N+S+E+W)
-        Button(self.lockframe, text='0', command=lambda: self.lockbox.insert(END, '0'), font = tkFont.Font(size=16, weight=tkFont.BOLD)).grid(row=5, column=1, sticky=N+S+E+W)
-        Button(self.lockframe, text='Enter', command=self.send_unlock, fg='green', font = tkFont.Font(size=12, weight=tkFont.BOLD)).grid(row=5,column=2, sticky=N+S+E+W)
+        Button(self.lockframe, text='Clear', command=lambda: self.lockbox.delete('0', END), fg='red', font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(row=5, sticky=N+S+E+W)
+        Button(self.lockframe, text='0', command=lambda: self.lockbox.insert(END, '0'), font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(row=5, column=1, sticky=N+S+E+W)
+        Button(self.lockframe, text='Enter', command=self.send_unlock, fg='green', font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(row=5,column=2, sticky=N+S+E+W)
+
+        self.lockframe.grid_rowconfigure(1, weight=1)
+        for n in range(2,6): self.lockframe.grid_rowconfigure(n, weight=2)
+        for n in range(0,3): self.lockframe.grid_columnconfigure(n, weight=1)
 
     def unlock(self):
         self.lockframe.pack_forget()
