@@ -59,13 +59,13 @@ class Main:
         self.menuwindow.destroy()
 
     def send_unlock(self):
-        print('passcode entered: ' + self.lockbox.get('1.0', END).strip() + ' correct passcode: ' + str(self.passcode))
-        if self.lockbox.get('1.0', END).strip() == str(self.passcode):
+        print('passcode entered: ' + self.lockbox.get() + ' correct passcode: ' + str(self.passcode))
+        if self.lockbox.get() == str(self.passcode):
             self.conn.send(['unlock'])
             self.locked = False
             self.unlock()
         else:
-            self.lockbox.delete('1.0', END)
+            self.lockbox.delete('0', END)
             self.locklabel.config(text="Incorrect passcode", fg='red')
 
     def lock(self):
@@ -76,15 +76,15 @@ class Main:
         self.lockframe = Frame(self.root)
         self.lockframe.pack(fill=BOTH, expand=1)
         self.locklabel = Label(self.lockframe, text="Enter passcode to unlock")
-        self.locklabel.grid(columnspan=3)
-        self.lockbox = Text(self.lockframe, height=1, font = tkFont.Font(size=20, weight=tkFont.BOLD))
-        self.lockbox.grid(row=1, columnspan=3)
+        self.locklabel.grid(columnspan=3, sticky=N+S+E+W)
+        self.lockbox = Entry(self.lockframe, show="*", font = tkFont.Font(size=20, weight=tkFont.BOLD))
+        self.lockbox.grid(row=1, columnspan=3, sticky=N+S+E+W)
 
         for n in range(1, 10):
             Button(self.lockframe, text=str(n), command=lambda n=n: self.lockbox.insert(END, str(n)), font = tkFont.Font(size=16, weight=tkFont.BOLD)).grid(
                   row=((n-1)/3)+2, column=n-(3*((n-1)/3)+1), sticky=N+S+E+W)
 
-        Button(self.lockframe, text='Clear', command=lambda: self.lockbox.delete('1.0', END), fg='red', font = tkFont.Font(size=12, weight=tkFont.BOLD)).grid(row=5, sticky=N+S+E+W)
+        Button(self.lockframe, text='Clear', command=lambda: self.lockbox.delete('0', END), fg='red', font = tkFont.Font(size=12, weight=tkFont.BOLD)).grid(row=5, sticky=N+S+E+W)
         Button(self.lockframe, text='0', command=lambda: self.lockbox.insert(END, '0'), font = tkFont.Font(size=16, weight=tkFont.BOLD)).grid(row=5, column=1, sticky=N+S+E+W)
         Button(self.lockframe, text='Enter', command=self.send_unlock, fg='green', font = tkFont.Font(size=12, weight=tkFont.BOLD)).grid(row=5,column=2, sticky=N+S+E+W)
 
