@@ -59,10 +59,8 @@ class Main:
         self.menuwindow.destroy()
 
     def send_unlock(self):
-        print('passcode entered: ' + self.lockbox.get() + ' correct passcode: ' + str(self.passcode))
         if self.lockbox.get() == str(self.passcode):
             self.conn.send(['unlock'])
-            self.locked = False
             self.unlock()
         else:
             self.lockbox.delete('0', END)
@@ -93,6 +91,7 @@ class Main:
         for n in range(0,3): self.lockframe.grid_columnconfigure(n, weight=1)
 
     def unlock(self):
+        self.locked = False
         self.lockframe.pack_forget()
         self.menubutton.pack(anchor='w')
         self.switchframe.pack(fill=BOTH, expand=1)

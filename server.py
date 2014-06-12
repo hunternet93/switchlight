@@ -110,11 +110,15 @@ class Main:
             if msg[0] == 'hb':
                 client.lasthb = time.time()
             elif msg[0] == 'on':
-                self.switches[msg[1]].on()
-                send_update = True
+                if self.locked: self.send_status([client])
+                else:
+                    self.switches[msg[1]].on()
+                    send_update = True
             elif msg[0] == 'off':
-                self.switches[msg[1]].off()
-                send_update = True
+                if self.locked: self.send_status([client])
+                else:
+                    self.switches[msg[1]].off()
+                    send_update = True
             elif msg[0] == 'lock':
                 print('locked by client: ', client.addr)
                 self.locked = True
