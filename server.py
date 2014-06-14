@@ -82,7 +82,7 @@ class Main:
             self.serv.send(['s', status], client.addr)
 
     def loop(self):
-        self.wrapper.AddEvent(50, self.loop)
+        self.wrapper.AddEvent(100, self.loop)
         send_update = False
         for msg, addr in self.serv.recv():
             if self.settings.get('debug'): print(msg, addr)
