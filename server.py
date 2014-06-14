@@ -9,8 +9,7 @@ class Switch:
         else: self.addrs = settings['addrs']
         self.onval = settings['onval']
         self.offval = settings['offval']
-#        self.fade = settings['fade']
-        self.fade = 0 # Force fade to 0 because it's broken and I'd like to get on with coding other stuff.
+        self.fade = settings['fade']
         if settings.get('start'):
             self.active = True
             self.val = self.onval
@@ -23,7 +22,7 @@ class Switch:
         self.time = None
 
     def on(self):
-        #if self.active: return
+        if self.active: return
         print('switch ' + self.name + ' turned on')
         self.active = True
         if self.fade == 0:
@@ -47,18 +46,13 @@ class Switch:
         self.time = time.time()
 
     def tick(self):
-        # TODO: Fix math below. It doesn't work. At all.
         if self.val < self.target:
-            try: t = self.fade / (time.time() - self.time)
-            except ZeroDivisionError: t = 0
-            self.val = int(((self.onval - self.offval) * t) + self.offval)
-            if self.val > self.target: self.val = self.target; print('clamping val to target')
+            try: self.val = int(self.target / (self.fade / (time.time() - self.time)))
+            except ZeroDivisionError: t = self.target
 
         if self.val > self.target:
-            try: t = 1 / (self.fade / (time.time() - self.time))
-            except ZeroDivisionError: t = 0
-            self.val = int(((self.onval - self.offval) * t) + self.offval)
-            if self.val < self.target: self.val = self.target; print('clamping val to target')
+            try: t = int(self.target / (self.fade / (self.fade - (time.time() - self.time))))
+            except ZeroDivisionError: t = self.target
 
         return self.addrs, self.val
 
