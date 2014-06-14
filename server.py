@@ -7,17 +7,16 @@ class Switch:
         self.name = name
         if settings.get('addr'): self.addrs = [settings['addr']]
         else: self.addrs = settings['addrs']
-        self.onval = settings['onval']
-        self.offval = settings['offval']
-        self.fade = settings['fade']
+        self.onval = settings.get('onval') or 255
+        self.fade = settings.get('fade') or 0
         if settings.get('start'):
             self.active = True
             self.val = self.onval
             self.target = self.onval
         else:
             self.active = False
-            self.val = self.offval
-            self.target = self.offval
+            self.val = 0
+            self.target = 0
 
         self.time = None
 
@@ -25,34 +24,28 @@ class Switch:
         if self.active: return
         print('switch ' + self.name + ' turned on')
         self.active = True
-        if self.fade == 0:
-            self.val = self.onval
-            self.target = self.onval
-        else:
-            self.val = self.offval
-            self.target = self.onval
+        self.val = 0
+        self.target = self.onval
         self.time = time.time()
 
     def off(self):
         if not self.active: return
         print('switch ' + self.name + ' turned off')
         self.active = False
-        if self.fade == 0:
-            self.val = self.offval
-            self.target = self.offval
-        else:
-            self.val = self.onval
-            self.target = self.offval
+        self.val = self.onval
+        self.target = 0
         self.time = time.time()
 
     def tick(self):
         if self.val < self.target:
             try: self.val = int(self.target / (self.fade / (time.time() - self.time)))
-            except ZeroDivisionError: t = self.target
+            except ZeroDivisionError: self.val = self.target
+            if self.val > self.target: self.val = self.target
 
         if self.val > self.target:
-            try: t = int(self.target / (self.fade / (self.fade - (time.time() - self.time))))
-            except ZeroDivisionError: t = self.target
+            try: self.val = int(self.onval / (self.fade / (self.fade - (time.time() - self.time))))
+            except ZeroDivisionError: self.val = self.target
+            if self.val < self.target: self.val = self.target
 
         return self.addrs, self.val
 
@@ -89,7 +82,7 @@ class Main:
             self.serv.send(['s', status], client.addr)
 
     def loop(self):
-        self.wrapper.AddEvent(100, self.loop)
+        self.wrapper.AddEvent(50, self.loop)
         send_update = False
         for msg, addr in self.serv.recv():
             if self.settings.get('debug'): print(msg, addr)
@@ -152,8 +145,9 @@ class Main:
         if not state.Succeeded():
             wrapper.Stop()
 
+
+main = Main()
 try:
-    main = Main()
     main.wrapper.Run()
 except:
     for client in main.clients.values():
