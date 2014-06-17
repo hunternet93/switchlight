@@ -79,12 +79,15 @@ class Main:
         self.lockbox.grid(row=1, columnspan=3, sticky=N+S+E+W)
 
         for n in range(1, 10):
-            Button(self.lockframe, text=str(n), command=lambda n=n: self.lockbox.insert(END, str(n)), font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(
-                  row=((n-1)/3)+2, column=n-(3*((n-1)/3)+1), sticky=N+S+E+W)
+            Button(self.lockframe, text=str(n), command=lambda n=n: self.lockbox.insert(END, str(n)), font = tkFont.Font(size=20, weight=tkFont.BOLD),
+                  activebackground = "grey", bg = "grey").grid(row=((n-1)/3)+2, column=n-(3*((n-1)/3)+1), sticky=N+S+E+W)
 
-        Button(self.lockframe, text='Clear', command=lambda: self.lockbox.delete('0', END), fg='red', font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(row=5, sticky=N+S+E+W)
-        Button(self.lockframe, text='0', command=lambda: self.lockbox.insert(END, '0'), font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(row=5, column=1, sticky=N+S+E+W)
-        Button(self.lockframe, text='Enter', command=self.send_unlock, fg='green', font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(row=5,column=2, sticky=N+S+E+W)
+        Button(self.lockframe, text='Clear', command=lambda: self.lockbox.delete('0', END), fg='red', activebackground = "grey", bg = "grey",
+               font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(row=5, sticky=N+S+E+W)
+        Button(self.lockframe, text='0', command=lambda: self.lockbox.insert(END, '0'), activebackground = "grey", bg = "grey", 
+               font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(row=5, column=1, sticky=N+S+E+W)
+        Button(self.lockframe, text='Enter', command=self.send_unlock, fg='green', activebackground = "grey", bg = "grey",
+               font = tkFont.Font(size=20, weight=tkFont.BOLD)).grid(row=5,column=2, sticky=N+S+E+W)
 
         self.lockframe.grid_rowconfigure(1, weight=1)
         for n in range(2,6): self.lockframe.grid_rowconfigure(n, weight=2)
