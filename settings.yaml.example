@@ -5,17 +5,12 @@ universe: 1
 switches:
     hallway:
         addr: 6
-        offval: 0
-        onval: 255
         fade: 1.5
     outside:
         addrs: [12, 13, 14, 15]
         onval: 200
-        offval: 0
         fade: 0
         start: on
     lobby:
         addrs: [127, 511]
-        onval: 255
-        offval: 0
-        fade: 0
+        fade: 2
