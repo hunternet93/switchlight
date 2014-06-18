@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sockethandler, time, sys, tkFont
+import sockethandler, time, sys, tkFont, math
 from Tkinter import *
 
 class Switch:
@@ -7,7 +7,6 @@ class Switch:
         self.name = name
         self.button = Button(window, text = self.name, command = self.pressed, font = tkFont.Font(size=20, weight=tkFont.BOLD))
         self.button.config(fg = "red", activebackground = "white", bg = "white", activeforeground="red")
-        self.button.pack(side=LEFT, fill=BOTH, expand=1)
         self.active = False
         self.conn = conn
 
@@ -116,10 +115,23 @@ class Main:
             if msg[0] == 's':
                 if not [s[0] for s in msg[1]['sw']] == [s.name for s in self.switches.values()]:
                     for sw in self.switches.values(): 
-                        sw.button.pack_forget()
+                        sw.button.grid_forget()
                         del self.switches[sw.name]
+
+                    swlist = []
                     for m in msg[1]['sw']:
                         self.switches[m[0]] = Switch(m[0], self.switchframe, self.conn)
+                        swlist.append(self.switches[m[0]])
+
+                    # To future readers of this code, I'm very sorry for the below line.
+                    rows, columns = int(round(math.sqrt(len(swlist)))), int(math.ceil(len(swlist)/round(math.sqrt(len(swlist)))))
+                    for row in range(1, rows + 1):
+                        for column in range(1, columns + 1):
+                            try:
+                                swlist.pop(0).button.grid(row=row, column=column, sticky=N+S+E+W)
+                                self.switchframe.grid_rowconfigure(row, weight=1)
+                                self.switchframe.grid_columnconfigure(column, weight=1)
+                            except IndexError: break                        
 
                 for m in msg[1]['sw']:
                     s = self.switches[m[0]]
