@@ -50,6 +50,8 @@ class Main:
         self.menuwindow = Toplevel(self.root)
         self.lockbutton = Button(self.menuwindow, text="Lock", command = self.send_lock, font = tkFont.Font(size=20, weight=tkFont.BOLD))
         self.lockbutton.pack(fill=BOTH, expand=1)
+        self.timerbutton = Button(self.menuwindow, text="Set Timer", command = self.timer_menu, font = tkFont.Font(size=20, weight=tkFont.BOLD))
+        self.timerbutton.pack(fill=BOTH, expand=1)
         self.closebutton = Button(self.menuwindow, text="Close", command = self.menuwindow.destroy, font = tkFont.Font(size=20, weight=tkFont.BOLD))
         self.closebutton.pack()
 
@@ -70,7 +72,7 @@ class Main:
         self.menubutton.pack_forget()
         self.switchframe.pack_forget()
 
-        self.lockframe = Frame(self.root, borderwidth=2, relief=RAISED)
+        self.lockframe = Frame(self.root)
         self.lockframe.pack(fill=BOTH, expand=1)
         self.locklabel = Label(self.lockframe, text="Enter passcode to unlock")
         self.locklabel.grid(columnspan=3, sticky=N+S+E+W)
@@ -95,6 +97,53 @@ class Main:
     def unlock(self):
         self.locked = False
         self.lockframe.pack_forget()
+        self.menubutton.pack(anchor='w')
+        self.switchframe.pack(fill=BOTH, expand=1)
+
+    def timer_menu(self):
+        self.menuwindow.destroy()
+        self.menubutton.pack_forget()
+        self.switchframe.pack_forget()
+
+        self.timerframe = Frame(self.root)
+        self.timerframe.pack(fill=BOTH, expand=1)
+
+        self.timerleftframe = Frame(self.timerframe)
+        self.timerleftframe.pack(side=LEFT, fill=BOTH, expand=1)
+
+        Label(self.timerleftframe, text="Turn selected switches:", font = tkFont.Font(size=20, weight=tkFont.BOLD)).pack(fill=BOTH,expand=1)
+
+        self.timermodevar = BooleanVar()
+        Radiobutton(self.timerleftframe, text='On', variable=self.timermodevar, value=True, font = tkFont.Font(size=20, weight=tkFont.BOLD)).pack(fill=BOTH,expand=1)
+        Radiobutton(self.timerleftframe, text='Off', variable=self.timermodevar, value=False, font = tkFont.Font(size=20, weight=tkFont.BOLD)).pack(fill=BOTH,expand=1)
+
+        self.switchbox = Listbox(self.timerleftframe, selectmode=MULTIPLE, font = tkFont.Font(size=20, weight=tkFont.BOLD))
+        self.switchbox.pack(fill=BOTH, expand=1)
+        [self.switchbox.insert(END, sw) for sw in self.switches]
+
+        self.timerrightframe = Frame(self.timerframe)
+        self.timerrightframe.pack(side=LEFT, expand=1, fill=BOTH)
+        self.lockvar = IntVar()
+        Checkbutton(self.timerrightframe, text='Lock', variable=self.lockvar, font = tkFont.Font(size=20, weight=tkFont.BOLD)).pack(fill=BOTH,expand=1)
+
+        Label(self.timerrightframe, text='Set switches in', font = tkFont.Font(size=20, weight=tkFont.BOLD)).pack(fill=BOTH, expand=1)
+        self.hourscale = Scale(self.timerrightframe, label='Hours', from_=0, to=23, orient=HORIZONTAL, font = tkFont.Font(size=20, weight=tkFont.BOLD))
+        self.hourscale.pack(fill=BOTH,expand=1)
+        self.minutescale = Scale(self.timerrightframe, label='Minutes', from_=0, to=59, orient=HORIZONTAL, font = tkFont.Font(size=20, weight=tkFont.BOLD))
+        self.minutescale.pack(fill=BOTH,expand=1)
+
+        Button(self.timerleftframe, text='Cancel', command=self.timer_cancel, fg='red', font = tkFont.Font(size=20, weight=tkFont.BOLD)).pack(expand=1, anchor='s')
+        Button(self.timerrightframe, text='Set Timer', command=self.timer_set, fg='green', font = tkFont.Font(size=20, weight=tkFont.BOLD)).pack(expand=1, anchor='s')
+
+    def timer_set(self):
+        switches = [self.switchbox.get(0,END)[int(i)] for i in self.switchbox.curselection()]
+        action = {sw: self.timermodevar.get() for sw in switches}
+        acttime = time.time() + ((self.hourscale.get() * 60) + self.minutescale.get()) * 60
+        self.conn.send(['timer', acttime, action, bool(self.lockvar.get())])
+        self.timer_cancel()
+
+    def timer_cancel(self):
+        self.timerframe.pack_forget()
         self.menubutton.pack(anchor='w')
         self.switchframe.pack(fill=BOTH, expand=1)
 
@@ -131,7 +180,7 @@ class Main:
                                 swlist.pop(0).button.grid(row=row, column=column, sticky=N+S+E+W)
                                 self.switchframe.grid_rowconfigure(row, weight=1)
                                 self.switchframe.grid_columnconfigure(column, weight=1)
-                            except IndexError: break                        
+                            except IndexError: break
 
                 for m in msg[1]['sw']:
                     s = self.switches[m[0]]
