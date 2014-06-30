@@ -58,7 +58,7 @@ class Timer:
         self.main = main
 
     def check(self):
-        if self.time >= time.time():
+        if self.time <= time.time():
             for s in self.action.items():
                 switch = self.main.switches.get(s[0])
                 if s[1]: switch.on()
@@ -146,7 +146,7 @@ class Main:
                 send_update = True
 
             elif msg[0] == 'timer':
-                print('timer set:' + msg[1:])
+                print('timer set:', msg[1:])
                 self.timers.append(Timer(msg[1], msg[2], msg[3], self))
                 send_update = True
 
