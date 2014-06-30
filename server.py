@@ -50,6 +50,29 @@ class Switch:
         return self.addrs, self.val
 
 
+class Timer:
+    def __init__(self, time, action, lock, main):
+        self.time = time
+        self.action = action
+        self.lock = lock
+        self.main = main
+
+    def check(self):
+        if self.time >= time.time():
+            for s in self.action.items():
+                switch = self.main.switches.get(s[0])
+                if s[1]: switch.on()
+                elif s[0]: switch.off()
+
+            if self.lock:
+                self.main.locked = True
+
+            return True
+
+        else:
+            return False
+
+
 class Client:
     def __init__(self, addr):
         self.addr = addr
@@ -61,6 +84,7 @@ class Main:
         self.settings = yaml.load(open('settings.yaml', 'r'))
         self.serv = sockethandler.server(self.settings.get('address') or 'localhost', self.settings.get('port') or 25500)
         self.clients = {}
+        self.timers = []
 
         self.locked = False
         self.passcode = self.settings['passcode']
@@ -78,6 +102,7 @@ class Main:
         status = {}
         status['sw'] = [[s.name, s.active] for s in self.switches.values()]
         status['l'] = [self.passcode, self.locked]
+        status['t'] = [[t.time, t.action, t.lock] for t in self.timers]
         for client in clients:
             self.serv.send(['s', status], client.addr)
 
@@ -94,26 +119,37 @@ class Main:
 
             if msg[0] == 'hi':
                 self.send_status([client])
+
             if msg[0] == 'hb':
                 client.lasthb = time.time()
+
             elif msg[0] == 'on':
                 if self.locked: self.send_status([client])
                 else:
                     self.switches[msg[1]].on()
                     send_update = True
+
             elif msg[0] == 'off':
                 if self.locked: self.send_status([client])
                 else:
                     self.switches[msg[1]].off()
                     send_update = True
+
             elif msg[0] == 'lock':
                 print('locked by client: ', client.addr)
                 self.locked = True
                 send_update = True
+
             elif msg[0] == 'unlock':
                 print('unlocked by client: ', client.addr)
                 self.locked = False
                 send_update = True
+
+            elif msg[0] == 'timer':
+                self.timers.append(Timer(msg[1], msg[2], msg[3], self)
+                print('timer set:' + msg[1])
+                send_update = True
+
             elif msg[0] == 'bye':
                 print('client ' + str(addr) + ' disconnected')
                 self.clients.remove(addr)
@@ -124,6 +160,11 @@ class Main:
         for switch in self.switches.values():
             addrs, val = switch.tick()
             for addr in addrs: dmx[addr-1] = val
+
+        for timer in self.timers():
+            if timer.check():
+                self.timers.remove(timer)
+                send_update = True
 
         for client in self.clients.values():
             if time.time() - client.lasthb > 0.5:
