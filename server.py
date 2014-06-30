@@ -146,8 +146,8 @@ class Main:
                 send_update = True
 
             elif msg[0] == 'timer':
-                self.timers.append(Timer(msg[1], msg[2], msg[3], self)
-                print('timer set:' + msg[1])
+                print('timer set:' + msg[1:])
+                self.timers.append(Timer(msg[1], msg[2], msg[3], self))
                 send_update = True
 
             elif msg[0] == 'bye':
