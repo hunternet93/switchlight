@@ -1,4 +1,4 @@
-switchlight
+Switchlight
 ===========
 
 Switchlight is a simple OpenLightingArchitecture network light switch designed to turn lights on and off while the primary DMX controller is offline. It supports multiple clients using a native client or a web UI.
@@ -27,9 +27,30 @@ To start the client:
 
     python client.py server_address[:port]
 
-Future Features
----------------
-Lights-off timer
+
+Switchclient API
+================
+
+Functions:
+    get_connected() -> True or False
+    get_switches() -> dict
+    get_timers() -> dict
+    get_locked() -> True or False
+    lock() -> None
+    unlock(passcode) -> True or False
+    set_timer(time, action, lock) -> None
+    cancel_timer(timer) -> None
+    disconnect() -> None
+
+Callbacks:
+    on_connect                                      Called when the connection to the Switchlight server is (re)established
+    on_disconnect               str reason          Called when the connection to the Switchlight server is lost
+    on_switches_initialized     dict switches       Called when switches are initialized
+    on_switch_toggled           Switch switch       Called when a switch is toggled
+    on_lock                                         Called when the Switchlight server is locked
+    on_unlock                                       Called when the Switchlight server is unlocked
+    on_timer_added              Timer timer         Called when a new Timer is added
+    on_timer_removed            Timer timer         Called when a Timer is removed, either by cancellation or expiration
 
 Credits
 -------

@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-import sockethandler, yaml, array, sys, time
+import sockethandler
+import yaml
+import array
+import sys
+import time
+import random
 from ola.ClientWrapper import ClientWrapper
 
 class Switch:
@@ -55,6 +60,7 @@ class Timer:
         self.time = time
         self.action = action
         self.lock = lock
+        self.id = random.randint(1, 9999)
         self.main = main
 
     def check(self):
@@ -84,7 +90,7 @@ class Main:
         self.settings = yaml.load(open('settings.yaml', 'r'))
         self.serv = sockethandler.server(self.settings.get('address') or 'localhost', self.settings.get('port') or 25500)
         self.clients = {}
-        self.timers = []
+        self.timers = {}
 
         self.locked = False
         self.passcode = self.settings['passcode']
@@ -102,7 +108,7 @@ class Main:
         status = {}
         status['sw'] = [[s.name, s.active] for s in self.switches.values()]
         status['l'] = [self.passcode, self.locked]
-        status['t'] = [[t.time, t.action, t.lock] for t in self.timers]
+        status['t'] = [[t.id, t.time, t.action, t.lock] for t in self.timers.values()]
         for client in clients:
             self.serv.send(['s', status], client.addr)
 
@@ -147,7 +153,14 @@ class Main:
 
             elif msg[0] == 'timer':
                 print('timer set:', msg[1:])
-                self.timers.append(Timer(msg[1], msg[2], msg[3], self))
+                timer = Timer(msg[1], msg[2], msg[3], self)
+                self.timers[timer.id] = timer
+                send_update = True
+
+            elif msg[0] == 'cancel_timer':
+                print('timer canceled:', msg[1:])
+                try: del self.timers[msg[1]]
+                except KeyError: pass
                 send_update = True
 
             elif msg[0] == 'bye':
@@ -161,9 +174,9 @@ class Main:
             addrs, val = switch.tick()
             for addr in addrs: dmx[addr-1] = val
 
-        for timer in self.timers:
+        for timer in self.timers.values():
             if timer.check():
-                self.timers.remove(timer)
+                del self.timers[timer.id]
                 send_update = True
 
         for client in self.clients.values():
