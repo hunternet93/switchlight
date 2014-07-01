@@ -50,7 +50,6 @@ def lock():
 
 @post('/unlock')
 def unlock():
-    if main.sl.get_locked(): redirect('/'); return
     if main.sl.unlock(request.forms.get('code')):
         time.sleep(0.2)
         redirect('/')
