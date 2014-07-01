@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import switchapi
+import switchlight-api
 import time
 import argparse
 
@@ -17,7 +17,7 @@ parser.add_argument('--set-timer', '-s', type=int, nargs='?', help='Sets a timer
 args = vars(parser.parse_args())
 
 try:
-    client = switchapi.Client(args['server'], int(args['port']))
+    client = switchlight-api.Client(args['server'], int(args['port']))
 
     while True:
         time.sleep(0.1)
@@ -36,6 +36,9 @@ try:
             for switch in args['off']: action[switch[0]] = False
         client.set_timer(time.time() + args['set_timer'] * 60, action, args['lock'])
         print('Timer set.')
+
+    elif args['lock']:
+        client.lock()
 
     elif args['unlock']:
         if client.unlock(args['unlock']):
@@ -69,7 +72,7 @@ try:
             print('Timer ' + str(timer.id) + ', ' + time.strftime('%I:%M:%S %p', time.localtime(timer.time)) + ':')
             for a in timer.action.items():
                 state = 'On' if a[1] else 'Off'
-                print('\tSet ' + switches[a[0]].name + ' ' + state)
+                print('\tSet ' + a[0] + ' ' + state)
             if timer.lock: print('\tLock Switchlight')
 
         locked = 'locked' if client.get_locked() else 'unlocked'
