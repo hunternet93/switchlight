@@ -283,7 +283,11 @@ class Main:
         self.root.geometry('600x360+0+0')
         self.root.after(1, self.loop)
 
+<<<<<<< HEAD
         self.sl = switchlight_api.Client(self.addr[0], int(self.addr[1]))
+=======
+        self.sl = switchlight_api.Client(*self.addr)
+>>>>>>> 8369309e7652351f1dac2d9d365c34f0bc96bf9d
         self.sl.on_connect = self.on_connect
         self.sl.on_disconnect = self.on_disconnect
         self.sl.on_switches_initialized = self.on_switches_initialized
