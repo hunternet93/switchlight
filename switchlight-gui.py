@@ -275,7 +275,7 @@ class SetTimerFrame:
 class Main:
     def __init__(self):
         try: self.addr = sys.argv[1].split(':')
-        except: print('Usage: client.py server_address[:port]'); quit()
+        except: print('Usage: switchlight-gui.py server_address[:port]'); quit()
         if len(self.addr) < 2: self.addr.append(25500)
 
         self.root = Tk()
@@ -283,7 +283,7 @@ class Main:
         self.root.geometry('600x360+0+0')
         self.root.after(1, self.loop)
 
-        self.sl = switchlight_api.Client(*self.addr)
+        self.sl = switchlight_api.Client(self.addr[0], int(self.addr[1]))
         self.sl.on_connect = self.on_connect
         self.sl.on_disconnect = self.on_disconnect
         self.sl.on_switches_initialized = self.on_switches_initialized

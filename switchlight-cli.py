@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import switchlight-api
+import switchlight_api
 import time
 import argparse
 
@@ -17,7 +17,7 @@ parser.add_argument('--set-timer', '-s', type=int, nargs='?', help='Sets a timer
 args = vars(parser.parse_args())
 
 try:
-    client = switchlight-api.Client(args['server'], int(args['port']))
+    client = switchlight_api.Client(args['server'], int(args['port']))
 
     while True:
         time.sleep(0.1)
