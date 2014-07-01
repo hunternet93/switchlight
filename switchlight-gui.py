@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import switchapi
+import switchlight_api
 import math
 import time
 import tkFont
@@ -283,7 +283,7 @@ class Main:
         self.root.geometry('600x360+0+0')
         self.root.after(1, self.loop)
 
-        self.sl = switchapi.Client(*self.addr)
+        self.sl = switchlight_api.Client(*self.addr)
         self.sl.on_connect = self.on_connect
         self.sl.on_disconnect = self.on_disconnect
         self.sl.on_switches_initialized = self.on_switches_initialized
@@ -313,7 +313,7 @@ class Main:
             self.set_frame('switch')
 
     def on_disconnect(self, reason):
-        if not reason == switchapi.REASON_CLIENT_DISCONNECT:
+        if not reason == switchlight_api.REASON_CLIENT_DISCONNECT:
             self.set_frame('message')
             self.frame.set_message('Disconnected from server: ' + reason)
 
