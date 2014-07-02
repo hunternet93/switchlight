@@ -5,11 +5,13 @@ Switchlight is a simple OpenLightingArchitecture network light switch designed t
 
 Requirements
 ------------
-Server:     Python, [OLA](http://www.openlighting.org/ola), Python-YAML
+Server: Python, [OLA](http://www.openlighting.org/ola), YAML
 
-Client:     Python, Python-Tkinter
+CLI Client: Python
 
-Web Client: Python, Python-Bottle
+GUI Client: Python, Tkinter
+
+Web Client: Python, Bottle
 
 Usage
 -----
@@ -17,21 +19,25 @@ The server settings are defined in settings.yaml, see the included settings.yaml
 
 To start the server, simply run:
 
-    python server.py
+    python switchlight-server.py
 
 To start the web server:
 
-    python webui.py
+    python swithlight-web.py server_address[:port] listen_address[:port]
 
-To start the client:
+To start the GUI client:
 
-    python client.py server_address[:port]
+    python switchlight-gui.py server_address[:port]
 
 
-Switchclient API
-================
+Switchlight Client API
+======================
+Programing your own Switchlight program is simple, refer to the clients' code for examples.
+
+Module name: switchlight_api
 
 Functions:
+
     get_connected() -> True or False
     get_switches() -> dict
     get_timers() -> dict
@@ -43,6 +49,7 @@ Functions:
     disconnect() -> None
 
 Callbacks:
+
     on_connect                                      Called when the connection to the Switchlight server is (re)established
     on_disconnect               str reason          Called when the connection to the Switchlight server is lost
     on_switches_initialized     dict switches       Called when switches are initialized
