@@ -10,7 +10,9 @@
         <meta http-equiv="refresh" content="10">
     </head>
     <body>
-        <img src="/logo.svg" style="height: 5em"/>
+        <div style="width: 100%; max-width: 500px; margin-left: auto; margin-right: auto">
+            <img src="/logo.svg"/>
+        </div>
         <br>
         % for sw in switches:
             % if sw[1] == 'on':
