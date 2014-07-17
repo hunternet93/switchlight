@@ -1,4 +1,4 @@
-![Switchlight](images/switchlight.svg?raw=true)
+![Switchlight](https://github.com/hunternet93/switchlight/images/switchlight.svg?raw=true)
 ===========
 
 Switchlight is a simple OpenLightingArchitecture network light switch designed to turn lights on and off while the primary DMX controller is offline. It supports multiple clients using a native client or a web UI.
