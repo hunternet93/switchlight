@@ -8,7 +8,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     </head>
     <body>
-        <img src="/logo.svg" style="height: 5em"/>
+        <div style="width: 100%; max-width: 500px; margin-left: auto; margin-right: auto">
+            <img src="/logo.svg"/>
+        </div>
         <br>
         <form name="settimer" action="/settimer" method="post">
             <p>
