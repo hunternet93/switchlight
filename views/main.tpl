@@ -1,6 +1,7 @@
 <html>
     <head>
         <title>Switchlight</title>
+        <link rel="icon" type="image/png" href="/favicon" />
         <style type="text/css">
             body {font-size: 200%; font-family: monospace; text-align: center;}
             a {color: #000000;}
@@ -9,7 +10,7 @@
         <meta http-equiv="refresh" content="10">
     </head>
     <body>
-        <h1>Switchlight</h1>
+        <img src="/logo.svg" style="height: 5em"/>
         <br>
         % for sw in switches:
             % if sw[1] == 'on':

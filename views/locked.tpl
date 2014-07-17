@@ -8,10 +8,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     </head>
     <body>
-        <h1>Switchlight</h1>
+        <img src="/logo.svg" style="height: 5em"/>
         <br>
         <p><b>Switchlight is locked.</b></p>
         <p>Enter the passcode to unlock</p>
+        % if incorrect:
+            <p style="color: #FF0000"><b>Incorrect Passcode</b></p>
+        % end
         <form name="passcode" action="unlock" method="post">
             <input type="password" name="code">
             <input type="submit" value="Unlock">

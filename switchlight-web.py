@@ -3,7 +3,7 @@ import switchlight_api
 import time
 import sys
 import threading
-from bottle import run, get, post, request, template, redirect
+from bottle import run, get, post, request, template, static_file, redirect, response
 
 class Main(threading.Thread):
     def __init__(self):
@@ -23,7 +23,7 @@ main = None
 
 @get('/')
 def webui():
-    if main.sl.get_locked(): return template('locked.tpl')
+    if main.sl.get_locked(): return template('locked.tpl', incorrect = False)
     return template(
                     'main.tpl',
                     switches = [[s.name, 'on' if s.active else 'off'] for s in main.sl.get_switches().values()], 
@@ -31,7 +31,6 @@ def webui():
                     timers = [[time.strftime('%I:%M:%S %p', time.localtime(t.time)),
                                t.action.items(), t.lock, t.id] for t in main.sl.get_timers().values()]
                     )
-
 
 @get('/set/<switch>')
 def set_switch(switch):
@@ -54,7 +53,7 @@ def unlock():
         time.sleep(0.2)
         redirect('/')
     else:
-        return "<meta http-equiv='refresh' content='3, url=/'>Incorrect passcode!"
+        return template('locked.tpl', incorrect = True)
 
 @get('/settimer')
 def set_timer_page():
@@ -80,6 +79,14 @@ def cancel_timer(id):
         time.sleep(0.2)
     redirect('/')
 
+@get('/logo.svg')
+def get_logo():
+    response.set_header('Cache-Control', 604800)
+    return static_file('switchlight.svg', root='images')
+
+@get('/favicon')
+def get_favicon():
+    return static_file('switch-small.png', root='images')
 
 try:
     main = Main()

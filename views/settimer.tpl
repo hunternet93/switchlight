@@ -8,7 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     </head>
     <body>
-        <h1>Switchlight</h1>
+        <img src="/logo.svg" style="height: 5em"/>
         <br>
         <form name="settimer" action="/settimer" method="post">
             <p>

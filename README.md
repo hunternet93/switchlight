@@ -62,3 +62,5 @@ Callbacks:
 Credits
 -------
 Switchlight was created by Isaac "hunternet93" Smith.
+
+The Switchlight logo was created by rg1024 and published by Openclipart ([link](https://openclipart.org/detail/36265/switch--by-rg1024)). Logo image is in the public domain.
