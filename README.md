@@ -28,7 +28,13 @@ To start the web server:
 To start the GUI client:
 
     python switchlight-gui.py server_address[:port]
+    
+Using the CLI client:
 
+    python switchlight-cli.py server_address [port] --query
+    python switchlight-cli.py server_address [port] --on hallway --off lobby --toggle outsdie
+    python switchlight-cli.py server_address [port] --unlock 12345
+    python switchlight-cli.py server_address [port] --set-timer 10 --off hallway --off lobby --lock
 
 Switchlight Client API
 ======================
@@ -36,28 +42,32 @@ Programing your own Switchlight program is simple, refer to the clients' code fo
 
 Module name: switchlight_api
 
+Starting the client:
+
+    client = switchlight_api.Client(server_address, port)
+
 Functions:
 
-    get_connected() -> True or False
-    get_switches() -> dict
-    get_timers() -> dict
-    get_locked() -> True or False
-    lock() -> None
-    unlock(passcode) -> True or False
-    set_timer(time, action, lock) -> None
-    cancel_timer(timer) -> None
-    disconnect() -> None
+    client.get_connected() -> True or False
+    client.get_switches() -> dict
+    client.get_timers() -> dict
+    client.get_locked() -> True or False
+    client.lock() -> None
+    client.unlock(passcode) -> True or False
+    client.set_timer(time, action, lock) -> None
+    client.cancel_timer(timer) -> None
+    client.disconnect() -> None
 
 Callbacks:
 
-    on_connect                                      Called when the connection to the Switchlight server is (re)established
-    on_disconnect               str reason          Called when the connection to the Switchlight server is lost
-    on_switches_initialized     dict switches       Called when switches are initialized
-    on_switch_toggled           Switch switch       Called when a switch is toggled
-    on_lock                                         Called when the Switchlight server is locked
-    on_unlock                                       Called when the Switchlight server is unlocked
-    on_timer_added              Timer timer         Called when a new Timer is added
-    on_timer_removed            Timer timer         Called when a Timer is removed, either by cancellation or expiration
+    client.on_connect                                      Called when the connection to the Switchlight server is (re)established
+    client.on_disconnect               str reason          Called when the connection to the Switchlight server is lost
+    client.on_switches_initialized     dict switches       Called when switches are initialized
+    client.on_switch_toggled           Switch switch       Called when a switch is toggled
+    client.on_lock                                         Called when the Switchlight server is locked
+    client.on_unlock                                       Called when the Switchlight server is unlocked
+    client.on_timer_added              Timer timer         Called when a new Timer is added
+    client.on_timer_removed            Timer timer         Called when a Timer is removed, either by cancellation or expiration
 
 Credits
 -------
