@@ -1,6 +1,8 @@
 <html>
     <head>
         <title>Switchlight - Locked</title>
+        <link rel="icon" type="image/png" href="/favicon" />
+        <link rel="apple-touch-icon-precomposed" href="images/switch-large.png">
         <style type="text/css">
             body {font-size: 200%; font-family: monospace; text-align: center;}
             a {color: #000000;}
@@ -9,7 +11,7 @@
     </head>
     <body>
         <div style="width: 100%; max-width: 500px; margin-left: auto; margin-right: auto">
-            <img src="/logo.svg"/>
+            <img src="images/switchlight.svg"/>
         </div>
         <br>
         <p><b>Switchlight is locked.</b></p>

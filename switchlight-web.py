@@ -79,10 +79,9 @@ def cancel_timer(id):
         time.sleep(0.2)
     redirect('/')
 
-@get('/logo.svg')
-def get_logo():
-    response.set_header('Cache-Control', 604800)
-    return static_file('switchlight.svg', root='images')
+@get('/images/<filename>')
+def get_static_image(filename):
+    return static_file(filename, root='images')
 
 @get('/favicon')
 def get_favicon():
