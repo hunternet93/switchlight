@@ -165,7 +165,7 @@ class Main:
 
             elif msg[0] == 'bye':
                 print('client ' + str(addr) + ' disconnected')
-                self.clients.remove(addr)
+                del self.clients[addr]
 
         dmx = array.array('B', [0] * 512)
         msg = ['sw']
