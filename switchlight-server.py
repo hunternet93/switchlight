@@ -171,7 +171,7 @@ class Main:
 
             elif msg[0] == 'bye':
                 print('client ' + str(addr) + ' disconnected')
-                self.clients.remove(addr)
+                del self.clients[addr]
 
         curr_universes = {u[0]: array.array('B', u[1]) for u in self.universes.items()}
         msg = ['sw']
