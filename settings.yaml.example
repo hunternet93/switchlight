@@ -1,6 +1,9 @@
 address: 0.0.0.0
 passcode: 12345
-universe: 1
+
+defaults:
+    universe: 1
+    fade: 1
 
 switches:
     hallway:
@@ -14,3 +17,4 @@ switches:
     lobby:
         addrs: [127, 511]
         fade: 2
+        universe: 2

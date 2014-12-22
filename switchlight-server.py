@@ -8,12 +8,13 @@ import random
 from ola.ClientWrapper import ClientWrapper
 
 class Switch:
-    def __init__(self, name, settings):
+    def __init__(self, name, settings, defaults):
         self.name = name
         if settings.get('addr'): self.addrs = [settings['addr']]
         else: self.addrs = settings['addrs']
         self.onval = settings.get('onval') or 255
-        self.fade = settings.get('fade') or 0
+        self.fade = settings.get('fade') or defaults.get('fade') or 0
+        self.universe = settings.get('universe') or defaults.get('universe')
         if settings.get('start'):
             self.active = True
             self.val = self.onval
@@ -95,11 +96,16 @@ class Main:
         self.locked = False
         self.passcode = self.settings['passcode']
 
-        self.switches = {}
-        for switch in self.settings['switches'].items():
-            self.switches[switch[0]] = Switch(switch[0], switch[1])
+        self.defaults = self.settings['defaults']
 
-        self.current_dmx = array.array('B', [0] * 512)
+        self.universes = {}
+        self.switches = {}
+        for s in self.settings['switches'].items():
+            switch = Switch(s[0], s[1], self.defaults)
+            if not self.universes.get(switch.universe):
+                self.universes[switch.universe] == array.array('B', [0] * 512)
+                
+            self.switches[s[0]] = switch
 
         self.wrapper = ClientWrapper()
         self.wrapper.AddEvent(100, self.loop)
@@ -167,12 +173,13 @@ class Main:
                 print('client ' + str(addr) + ' disconnected')
                 self.clients.remove(addr)
 
-        dmx = array.array('B', [0] * 512)
+        curr_universes = {u[0]: array.array('B', u[1]) for u in self.universes.items()}
         msg = ['sw']
 
         for switch in self.switches.values():
             addrs, val = switch.tick()
-            for addr in addrs: dmx[addr-1] = val
+            for addr in addrs:
+                curr_universes[switch.universe][addr-1] = val
 
         for timer in self.timers.values():
             if timer.check():
