@@ -103,7 +103,7 @@ class Main:
         for s in self.settings['switches'].items():
             switch = Switch(s[0], s[1], self.defaults)
             if not self.universes.get(switch.universe):
-                self.universes[switch.universe] == array.array('B', [0] * 512)
+                self.universes[switch.universe] = array.array('B', [0] * 512)
                 
             self.switches[s[0]] = switch
 
@@ -194,10 +194,11 @@ class Main:
                 print('client ' + str(client.addr) + ' timed out')
                 del self.clients[client.addr]
 
-        if not dmx == self.current_dmx:
+        if not curr_universes == self.universes:
             send_update = True
-            self.wrapper.Client().SendDmx(self.settings['universe'], dmx, self.DmxSent)
-            self.current_dmx = dmx
+            for universe in curr_universes.items():
+                self.wrapper.Client().SendDmx(universe[0], universe[1], self.DmxSent)
+            self.universes = curr_universes
 
         if send_update:
             self.send_status(self.clients.values())
