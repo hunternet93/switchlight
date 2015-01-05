@@ -185,7 +185,7 @@ class Client:
                 for t in msg[1]['t']:
                     if not self._timers.get(t[0]): self._on_timer_added(t)
 
-                for timer in self._timers.values():
+                for timer in list(self._timers.values()):
                     if not timer.id in [t[0] for t in msg[1]['t']]:
                         self._on_timer_removed(timer)
 
