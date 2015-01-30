@@ -11,30 +11,15 @@ REASON_SERVER_DISCONNECT = 'REASON_SERVER_EXIT'
 REASON_CLIENT_DISCONNECT = 'REASON_CLIENT_DISCONNECT'
 
 class Switch:
-    def __init__(self, name, active, conn):
+    def __init__(self, name, states, status, conn):
         self.name = name
-        self.active = active
+        self.states = states
+        self.status = status
         self._conn = conn
 
-        self.on = self.off = lambda: None
-
-    def set(self, state):
-        if state == self.active: return
-        if self.active:
-            self._conn.send(['off', self.name])
-            self.off()
-        else:
-            self._conn.send(['on', self.name])
-            self.on()
-
-    def _on(self):
-        self.active = True
-        self.on()
-
-    def _off(self):
-        self.active = False
-        self.off()
-
+    def set(self, status):
+        self.status = status
+        self._conn.send(['set', self.name, status])
 
 class Timer:
     def __init__(self, id, time, action, lock):
@@ -65,7 +50,7 @@ class Client:
         self.on_connect = \
             self.on_disconnect = \
             self.on_switches_initialized = \
-            self.on_switch_toggled = \
+            self.on_switch_changed = \
             self.on_lock = \
             self.on_unlock = \
             self.on_timer_added = \
@@ -87,11 +72,10 @@ class Client:
         for sw in msg: self._switches[sw[0]] = Switch(sw[0], sw[1], self._conn)
         self.on_switches_initialized(self._switches)
 
-    def _on_switch_toggled(self, switch):
+    def _on_switch_changed(self, switch, status):
         # Called when a switch is toggled
-        if switch.active: switch._off()
-        else: switch._on()
-        self.on_switch_toggled(switch)
+        switch.set(status)
+        self.on_switch_changed(switch, status)
 
     def _on_lock(self):
         # Called when Switchlight server is locked
@@ -120,6 +104,10 @@ class Client:
     def get_switches(self):
         """Returns dictionary of switches indexed by name"""
         return self._switches
+
+    def get_switch(self, switch):
+        """Get Switch by name, or None if no switch has that name"""
+        return self._switches.get(switch)
 
     def get_timers(self):
         """Returns a dictionary of timers indexed by ID"""
@@ -179,8 +167,8 @@ class Client:
                 if not len(self._switches): self._initialize_switches(msg[1]['sw'])
 
                 for sw in msg[1]['sw']:
-                    if not self._switches[sw[0]].active == sw[1]:
-                        self._on_switch_toggled(self._switches[sw[0]])
+                    if not self._switches[sw['name']].status == sw['status']:
+                        self._on_switch_changed(self._switches[sw['name']], sw['status'])
 
                 for t in msg[1]['t']:
                     if not self._timers.get(t[0]): self._on_timer_added(t)

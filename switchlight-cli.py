@@ -31,9 +31,9 @@ try:
 
         action = {}
         if args['on']:
-            for switch in args['on']: action[switch[0]] = True
+            for switch in args['on']: action[switch[0]] = client.get_switch(switch[0])).states[-1]
         if args['off']:
-            for switch in args['off']: action[switch[0]] = False
+            for switch in args['off']: action[switch[0]] = client.get_switch(switch[0])).states[0]
         client.set_timer(time.time() + args['set_timer'] * 60, action, args['lock'])
         print('Timer set.')
 
@@ -53,12 +53,20 @@ try:
 
         if args['toggle']:
             for s in args['toggle']:
-                switch = client.get_switches()[s[0]]
-                switch.set(not switch.active)
+                switch = client.get_switch(s[0])
+                if switch.states.index(switch.status) > 0:
+                    switch.set(switch.states[0])
+                else:
+                    switch.set(switch.states[-1])
+                    
         if args['on']:
-            for s in args['on']: client.get_switches()[s[0]].set(True)
+            for s in args['on']:
+                switch = client.get_switch(s[0])
+                switch.set(switch.states[-1])
         if args['off']:
-            for s in args['off']: client.get_switches()[s[0]].set(False)
+            for s in args['off']:
+                switch = client.get_switch(s[0])
+                switch.set(switch.states[0])
 
     time.sleep(0.25)
     client.update()
@@ -66,13 +74,11 @@ try:
     if args['query']:
         switches = client.get_switches()
         for switch in switches.values():
-            state = 'On' if switch.active else 'Off'
-            print(switch.name + ': ' + state)
+            print(switch.name + ': ' + switch.state)
         for timer in client.get_timers().values():
             print('Timer ' + str(timer.id) + ', ' + time.strftime('%I:%M:%S %p', time.localtime(timer.time)) + ':')
             for a in timer.action.items():
-                state = 'On' if a[1] else 'Off'
-                print('\tSet ' + a[0] + ' ' + state)
+                print('\tSet ' + a[0] + ' ' + a[1])
             if timer.lock: print('\tLock Switchlight')
 
         locked = 'locked' if client.get_locked() else 'unlocked'

@@ -11,10 +11,14 @@ switches:
         fade: 1.5
     outside:
         addrs: [12, 13, 14, 15]
-        onval: 200
+        on: 200
         fade: 0
         start: on
     lobby:
         addrs: [127, 511]
+        states:
+            - off: 0
+            - dim: 100
+            - full: 255
         fade: 2
         universe: 2

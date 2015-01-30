@@ -5,41 +5,56 @@ import array
 import sys
 import time
 import random
+import collections
 from ola.ClientWrapper import ClientWrapper
 
 class Switch:
     def __init__(self, name, settings, defaults):
         self.name = name
-        if settings.get('addr'): self.addrs = [settings['addr']]
-        else: self.addrs = settings['addrs']
-        self.onval = settings.get('onval') or 255
+        if settings.get('addr'):
+            self.addrs = [settings['addr']]
+        else:
+            self.addrs = settings['addrs']
+
+        if settings.get('states'):
+            self.statenames = []
+            self.states = []
+            
+            for s in settings.get('states'):
+                self.statenames.append(s.keys()[0])
+                self.states.append(s.values()[0])
+        
+        else:
+            self.statenames = ['off', 'on']
+            self.states = [0, settings.get('on') or 255]
+
         self.fade = settings.get('fade') or defaults.get('fade') or 0
         self.universe = settings.get('universe') or defaults.get('universe')
+
         if settings.get('start'):
-            self.active = True
-            self.val = self.onval
-            self.target = self.onval
+            self.status = self.statenames.index(settings['start'])
         else:
-            self.active = False
-            self.val = 0
-            self.target = 0
+            self.status = 0
 
+        self.target = self.states[self.status]
+        self.val = self.states[self.status]
         self.time = None
+        
+    def json(self):
+        return {
+            'name': self.name,
+            'states': self.statenames,
+            'status', self.status
+        }
 
-    def on(self):
-        if self.active: return
-        print('switch ' + self.name + ' turned on')
-        self.active = True
-        self.val = 0
-        self.target = self.onval
-        self.time = time.time()
-
-    def off(self):
-        if not self.active: return
-        print('switch ' + self.name + ' turned off')
-        self.active = False
-        self.val = self.onval
-        self.target = 0
+    def set(self, statename):
+        print('switch ' + self.name + ' set to ' + statename)
+        try:
+            self.status = self.statenames.index(statename)
+        except ValueError:
+            print('invalid state name: ' + statename)
+            
+        self.target = self.states[self.status]
         self.time = time.time()
 
     def tick(self):
@@ -68,8 +83,7 @@ class Timer:
         if self.time <= time.time():
             for s in self.action.items():
                 switch = self.main.switches.get(s[0])
-                if s[1]: switch.on()
-                elif s[0]: switch.off()
+                switch.set(s[1])
 
             if self.lock:
                 self.main.locked = True
@@ -79,12 +93,10 @@ class Timer:
         else:
             return False
 
-
 class Client:
     def __init__(self, addr):
         self.addr = addr
         self.lasthb = time.time()
-
 
 class Main:
     def __init__(self):
@@ -112,7 +124,7 @@ class Main:
 
     def send_status(self, clients):
         status = {}
-        status['sw'] = [[s.name, s.active] for s in self.switches.values()]
+        status['sw'] = [s.json() for s in self.switches.values()]
         status['l'] = [self.passcode, self.locked]
         status['t'] = [[t.id, t.time, t.action, t.lock] for t in self.timers.values()]
         for client in clients:
@@ -134,19 +146,13 @@ class Main:
 
             if msg[0] == 'hb':
                 client.lasthb = time.time()
-
-            elif msg[0] == 'on':
+                
+            elif msg[0] == 'set':
                 if self.locked: self.send_status([client])
                 else:
-                    self.switches[msg[1]].on()
+                    self.switches[msg[1]].set(msg[2])
                     send_update = True
-
-            elif msg[0] == 'off':
-                if self.locked: self.send_status([client])
-                else:
-                    self.switches[msg[1]].off()
-                    send_update = True
-
+                    
             elif msg[0] == 'lock':
                 print('locked by client: ', client.addr)
                 self.locked = True
