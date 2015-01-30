@@ -17,12 +17,12 @@
         <form name="settimer" action="/settimer" method="post">
             <p>
                 Turn switches
-                <input type="radio" name="switchmode" value="1"><span style="color: #00FF00">On</span>
-                <input type="radio" name="switchmode" value="0" checked><span style="color: #FF0000">Off</span>
+                <input type="radio" name="switchmode" value="on"><span style="color: #00FF00">On</span>
+                <input type="radio" name="switchmode" value="off" checked><span style="color: #FF0000">Off</span>
             </p>
             <p> Switches: </p>
-            % for s in switches:
-                <p><input type="checkbox" name="switches" value="{{s}}">{{s}}</p>
+            % for sw in switches:
+                <p><input type="checkbox" name="switches" value="{{sw.name}}">{{sw.name}}</p>
             % end
             <p><input type="checkbox" name="lock" value="1">Lock Switchlight</p>
             <br>

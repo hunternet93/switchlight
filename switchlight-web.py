@@ -26,17 +26,17 @@ def webui():
     if main.sl.get_locked(): return template('locked.tpl', incorrect = False)
     return template(
                     'main.tpl',
-                    switches = [[s.name, 'on' if s.active else 'off'] for s in main.sl.get_switches().values()], 
+                    switches = [sw for sw in main.sl.get_switches().values()], 
                     locked = main.sl.get_locked(),
                     timers = [[time.strftime('%I:%M:%S %p', time.localtime(t.time)),
                                t.action.items(), t.lock, t.id] for t in main.sl.get_timers().values()]
                     )
 
-@get('/set/<switch>')
-def set_switch(switch):
+@get('/set/<switch>/<statename>')
+def set_switch(switch, statename):
     if main.sl.get_locked(): redirect('/'); return
     sw = main.sl.get_switches()[switch]
-    sw.set(not sw.active)
+    sw.set(statename)
     time.sleep(0.2)
     redirect('/')
 
@@ -58,13 +58,20 @@ def unlock():
 @get('/settimer')
 def set_timer_page():
     if main.sl.get_locked(): redirect('/'); return
-    return template('settimer.tpl', switches = [s.name for s in main.sl.get_switches().values()])
+    return template('settimer.tpl', switches = main.sl.get_switches().values())
 
 @post('/settimer')
 def set_timer():
     if main.sl.get_locked(): redirect('/'); return
 
-    action = {sw: bool(int(request.forms.get('switchmode'))) for sw in request.forms.getall('switches')}
+    action = {}
+    for switchname in request.forms.getall('switches'):
+        switch = main.sl.get_switch(switchname)
+        if request.forms.get('switchmode') == 'on':
+            action[switch.name] = switch.states[-1]
+        else:
+            action[switch.name] = switch.states[0]
+            
     acttime = time.time() + ((int(request.forms.get('hours')) * 60) + int(request.forms.get('minutes'))) * 60
     main.sl.set_timer(acttime, action, bool(request.forms.get('lock')))
     time.sleep(0.2)
