@@ -60,7 +60,7 @@ class Switch:
 
     def tick(self):
         if self.val < self.target:
-            try: self.val = int(self.target / (self.fade / (time.time() - self.time)))
+            try: self.val = self.start + int((self.target-self.start) / (self.fade / (time.time() - self.time)))
             except ZeroDivisionError: self.val = self.target
             if self.val > self.target: self.val = self.target
 
