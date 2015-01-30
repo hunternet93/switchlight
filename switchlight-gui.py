@@ -9,8 +9,7 @@ class SwitchButton:
     def __init__(self, parent, switch):
         self.parent = parent
         self.switch = switch
-        self.switch.on = self.on
-        self.switch.off = self.off
+        self.switch.changed = self.changed
 
         self.name = self.switch.name
         self.button = Button(self.parent, text = self.name, command = self.pressed, 
@@ -18,16 +17,22 @@ class SwitchButton:
                              fg = "red", activebackground = "white", bg = "white",
                              activeforeground = "red")
 
-        if self.switch.active: self.on()
-
+        self.changed()
+        
     def pressed(self):
-        self.switch.set(not self.switch.active)
+        if self.switch.status >= len(self.switch.states)-1:
+            self.switch.set(self.switch.states[0])
+        else:
+            self.switch.set(self.switch.states[self.switch.status+1])
 
-    def on(self):
-        self.button.config(fg = "green", activeforeground = "green")
+    def changed(self):
+        print('changed!')
+        if self.switch.status == 0:
+            self.button.config(fg = "red", activeforeground = "red")
+        else:
+            self.button.config(fg = "green", activeforeground = "green")
 
-    def off(self):
-        self.button.config(fg = "red", activeforeground = "red")
+        self.button.config(text = self.name + '\n' + self.switch.states[self.switch.status])
 
 class TimerWidget:
     def __init__(self, parent, timer, cancel, row):
@@ -41,8 +46,7 @@ class TimerWidget:
 
         actions = ''
         for a in self.timer.action.items():
-            state = 'On' if a[1] else 'Off'
-            actions += a[0] + ' ' + state + '\n'
+            actions += a[0] + ' ' + a[1] + '\n'
         if timer.lock: actions += 'Lock Switchlight\n'
 
         self.actionslabel = Label(self.parent, font = tkFont.Font(size = 16),
@@ -255,7 +259,11 @@ class SetTimerFrame:
 
     def timer_set(self):
         switches = [self.switchbox.get(0,END)[int(i)] for i in self.switchbox.curselection()]
-        action = {sw: self.timermodevar.get() for sw in switches}
+        if self.timermodevar.get():
+            action = {sw: sw.states[-1] for sw in switches}
+        else:
+            action = {sw: sw.states[0] for sw in switches}
+
         acttime = time.time() + ((self.hourscale.get() * 60) + self.minutescale.get()) * 60
 
         self.main.sl.set_timer(acttime, action, self.lockvar.get())

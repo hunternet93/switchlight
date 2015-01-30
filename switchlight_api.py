@@ -16,10 +16,11 @@ class Switch:
         self.states = states
         self.status = status
         self._conn = conn
+        
+        self.changed = lambda: None
 
-    def set(self, status):
-        self.status = status
-        self._conn.send(['set', self.name, status])
+    def set(self, statename):
+        self._conn.send(['set', self.name, statename])
 
 class Timer:
     def __init__(self, id, time, action, lock):
@@ -69,12 +70,13 @@ class Client:
 
     def _initialize_switches(self, msg):
         # Called to initialize switches
-        for sw in msg: self._switches[sw[0]] = Switch(sw[0], sw[1], self._conn)
+        for sw in msg: self._switches[sw['name']] = Switch(sw['name'], sw['states'], sw['status'], self._conn)
         self.on_switches_initialized(self._switches)
 
     def _on_switch_changed(self, switch, status):
-        # Called when a switch is toggled
-        switch.set(status)
+        # Called when a switch is changed\
+        switch.status = status
+        switch.changed()
         self.on_switch_changed(switch, status)
 
     def _on_lock(self):

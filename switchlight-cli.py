@@ -31,9 +31,9 @@ try:
 
         action = {}
         if args['on']:
-            for switch in args['on']: action[switch[0]] = client.get_switch(switch[0])).states[-1]
+            for switch in args['on']: action[switch[0]] = client.get_switch(switch[0]).states[-1]
         if args['off']:
-            for switch in args['off']: action[switch[0]] = client.get_switch(switch[0])).states[0]
+            for switch in args['off']: action[switch[0]] = client.get_switch(switch[0]).states[0]
         client.set_timer(time.time() + args['set_timer'] * 60, action, args['lock'])
         print('Timer set.')
 
@@ -54,7 +54,7 @@ try:
         if args['toggle']:
             for s in args['toggle']:
                 switch = client.get_switch(s[0])
-                if switch.states.index(switch.status) > 0:
+                if switch.status > 0:
                     switch.set(switch.states[0])
                 else:
                     switch.set(switch.states[-1])
@@ -74,7 +74,7 @@ try:
     if args['query']:
         switches = client.get_switches()
         for switch in switches.values():
-            print(switch.name + ': ' + switch.state)
+            print(switch.name + ': ' + switch.states[switch.status])
         for timer in client.get_timers().values():
             print('Timer ' + str(timer.id) + ', ' + time.strftime('%I:%M:%S %p', time.localtime(timer.time)) + ':')
             for a in timer.action.items():
