@@ -44,7 +44,7 @@ class Switch:
         return {
             'name': self.name,
             'states': self.statenames,
-            'status', self.status
+            'status': self.status
         }
 
     def set(self, statename):
