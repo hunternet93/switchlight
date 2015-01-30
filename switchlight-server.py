@@ -64,7 +64,7 @@ class Switch:
             if self.val > self.target: self.val = self.target
 
         if self.val > self.target:
-            try: self.val = int(self.onval / (self.fade / (self.fade - (time.time() - self.time))))
+            try: self.val = int(255 / (self.fade / (self.fade - (time.time() - self.time))))
             except ZeroDivisionError: self.val = self.target
             if self.val < self.target: self.val = self.target
 
