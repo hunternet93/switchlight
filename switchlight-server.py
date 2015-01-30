@@ -54,6 +54,7 @@ class Switch:
         except ValueError:
             print('invalid state name: ' + statename)
             
+        self.start = int(self.val)
         self.target = self.states[self.status]
         self.time = time.time()
 
@@ -64,7 +65,7 @@ class Switch:
             if self.val > self.target: self.val = self.target
 
         if self.val > self.target:
-            try: self.val = int(255 / (self.fade / (self.fade - (time.time() - self.time))))
+            try: self.val = int(self.start / (self.fade / (self.fade - (time.time() - self.time))))
             except ZeroDivisionError: self.val = self.target
             if self.val < self.target: self.val = self.target
 
