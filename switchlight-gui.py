@@ -260,9 +260,9 @@ class SetTimerFrame:
     def timer_set(self):
         switches = [self.switchbox.get(0,END)[int(i)] for i in self.switchbox.curselection()]
         if self.timermodevar.get():
-            action = {sw: sw.states[-1] for sw in switches}
+            action = {sw: self.main.sl.get_switch(sw).states[-1] for sw in switches}
         else:
-            action = {sw: sw.states[0] for sw in switches}
+            action = {sw: self.main.sl.get_switch(sw).states[0] for sw in switches}
 
         acttime = time.time() + ((self.hourscale.get() * 60) + self.minutescale.get()) * 60
 
