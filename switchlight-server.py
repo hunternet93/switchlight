@@ -22,11 +22,16 @@ class Switch:
             
             for s in settings.get('states'):
                 self.statenames.append(s.keys()[0])
-                self.states.append(s.values()[0])
+                if type(s.values()[0]) == int:
+                    self.states.append([s.values()[0]] * len(self.addrs))
+                elif type(s.values()[0]) == list:
+                    self.states.append(s.values()[0])
+                else:
+                    raise Exception("Error parsing settings.yaml")
         
         else:
             self.statenames = ['off', 'on']
-            self.states = [0, settings.get('on') or 255]
+            self.states = [[0], [settings.get('on') or 255]]
 
         self.fade = settings.get('fade') or defaults.get('fade') or 0
         self.universe = settings.get('universe') or defaults.get('universe')
@@ -36,8 +41,8 @@ class Switch:
         else:
             self.status = 0
 
-        self.target = self.states[self.status]
-        self.val = self.states[self.status]
+        self.targets = self.starts = self.states[self.status]
+        self.vals = list(self.states[self.status])
         self.time = None
         
     def json(self):
@@ -54,22 +59,29 @@ class Switch:
         except ValueError:
             print('invalid state name: ' + statename)
             
-        self.start = int(self.val)
-        self.target = self.states[self.status]
+        self.starts = list(self.vals)
+        self.targets = self.states[self.status]
         self.time = time.time()
 
     def tick(self):
-        if self.val < self.target:
-            try: self.val = self.start + int((self.target-self.start) / (self.fade / (time.time() - self.time)))
-            except ZeroDivisionError: self.val = self.target
-            if self.val > self.target: self.val = self.target
+        for i in range(len(self.addrs)):
+            val = self.vals[i]
+            start = self.starts[i]
+            target = self.targets[i]
+            
+            if val < target:
+                try: val = start + int((target - start) / (self.fade / (time.time() - self.time)))
+                except ZeroDivisionError: val = target
+                if val > target: val = target
 
-        if self.val > self.target:
-            try: self.val = int(self.start / (self.fade / (self.fade - (time.time() - self.time))))
-            except ZeroDivisionError: self.val = self.target
-            if self.val < self.target: self.val = self.target
+            if val > target:
+                try: val = int(start / (self.fade / (self.fade - (time.time() - self.time))))
+                except ZeroDivisionError: val = target
+                if val < target: val = target
+                
+            self.vals[i] = val
 
-        return self.addrs, self.val
+        return self.addrs, self.vals
 
 
 class Timer:
@@ -184,9 +196,9 @@ class Main:
         msg = ['sw']
 
         for switch in self.switches.values():
-            addrs, val = switch.tick()
+            addrs, vals = switch.tick()
             for addr in addrs:
-                curr_universes[switch.universe][addr-1] = val
+                curr_universes[switch.universe][addr-1] = vals[addrs.index(addr)]
 
         for timer in self.timers.values():
             if timer.check():

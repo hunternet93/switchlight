@@ -18,7 +18,7 @@ switches:
         addrs: [127, 511]
         states:
             - off: 0
-            - dim: 100
+            - dim: [100, 175]
             - full: 255
         fade: 2
         universe: 2
